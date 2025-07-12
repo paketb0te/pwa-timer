@@ -163,7 +163,7 @@
 <body>
     <div class="timer-container">
         <div class="status-text" id="statusText">Ready to start</div>
-        <div class="timer-display" id="timerDisplay">3:30</div>
+        <div class="timer-display" id="timerDisplay">0:00</div>
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
         </div>
@@ -177,7 +177,7 @@
     <script>
         class Timer {
             constructor() {
-                this.totalTime = 3 * 60 + 30; // 3:30 in seconds
+                this.totalTime = this.getConfiguredDuration();
                 this.timeLeft = this.totalTime;
                 this.isRunning = false;
                 this.intervalId = null;
@@ -192,6 +192,70 @@
 
                 this.bindEvents();
                 this.requestWakeLock();
+                this.updateDisplay();
+                this.updateProgress();
+            }
+
+            getConfiguredDuration() {
+                // Check if duration was passed as URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlDuration = urlParams.get('duration');
+
+                if (urlDuration && !isNaN(urlDuration) && urlDuration > 0) {
+                    const duration = parseInt(urlDuration);
+                    // Store the duration so it persists after installation
+                    this.storeDuration(duration);
+                    return duration;
+                }
+
+                // Check if we have a stored duration
+                const storedDuration = this.getStoredDuration();
+                if (storedDuration) {
+                    return storedDuration;
+                }
+
+                // Default to 3:30
+                return 3 * 60 + 30;
+            }
+
+            storeDuration(duration) {
+                try {
+                    const data = { duration: duration, timestamp: Date.now() };
+                    window.timerConfig = data;
+                    // Also try to store in localStorage if available (for browsers that support it)
+                    if (typeof Storage !== 'undefined') {
+                        localStorage.setItem('timerDuration', JSON.stringify(data));
+                    }
+                } catch (e) {
+                    // Silently fail if storage is not available
+                }
+            }
+
+            getStoredDuration() {
+                try {
+                    // First check in-memory storage
+                    if (window.timerConfig && window.timerConfig.duration) {
+                        return window.timerConfig.duration;
+                    }
+
+                    // Then check localStorage if available
+                    if (typeof Storage !== 'undefined') {
+                        const stored = localStorage.getItem('timerDuration');
+                        if (stored) {
+                            const data = JSON.parse(stored);
+                            return data.duration;
+                        }
+                    }
+                } catch (e) {
+                    // Silently fail if storage is not available
+                }
+                return null;
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
             }
 
             bindEvents() {
@@ -273,9 +337,7 @@
             }
 
             updateDisplay() {
-                const minutes = Math.floor(this.timeLeft / 60);
-                const seconds = this.timeLeft % 60;
-                this.timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                this.timerDisplay.textContent = this.formatTime(this.timeLeft);
             }
 
             updateProgress() {
