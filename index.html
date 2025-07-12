@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3:30 Timer</title>
-    <link rel="manifest"
-        href="data:application/json;base64,eyJuYW1lIjoiMzozMCBUaW1lciIsInNob3J0X25hbWUiOiJUaW1lciIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwic3RhcnRfdXJsIjoiLyIsInRoZW1lX2NvbG9yIjoiIzJkM2E4YyIsImJhY2tncm91bmRfY29sb3IiOiIjMWEyMDJjIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1UazJJaUJvWldsbmFIUTlJakU1TmlJZ2RtbGxkMEp2ZUQwaU1DQXdJREU1TmlBeE9UWWlJR1pwYkd3OUlpTXlkRE5oT0dNaUlIaHRiRzV6UFNKb2RIUndPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1EQXdMMk41WnlJK1BHTnBjbU5zWlNCallsZ3JZMmtnUXowOU9UZ2lJSEk5SWpjMklpQm1hV3hzUFNKM2FHbDBaU0l2UGp4MFpYaDBJSGc5SWpFeElpQjVQU0k0TnlJZ1ptbHNiRDBpSTJabWJtWm1jaUlnWm05dWRDMW1ZVzFwYkhsOUltMXZibU53WVdObElpQm1iMjUwTFhOcGVtVTlJakV3SWlCbWIyNTBMWGRsYVdkb2REMGlOREF3SWlCMFpYaDBMV0ZqYUc5eVBTSnRhV1JrYkdVaVBqTTZNekE4TDNSbGVIUStQQzl6ZG1jK0lpd2ljMmw2WlhNaU9pSXhPVFl5TnpJeE1qWWlMQ0owZVhCbElqb2lhVzFoWjJVdmMzWm5JaXdpWkdWdWMybDBlU0k2SWpFeE1qVWlmU3g3SW5OeVl5STZJbVJoZEdFNmFXMWhaMlV2YzNabklubGhiV3c3WW1GelpUWTBMa1ZITVVSaFEwRkNRVUZwSWloVFJVVXJObTQwVW1kdU5sWTJSa0Z2UWxndVdHUlVjbXROUjBSNE5UZGhhVnBCZGxCWFEyOU1kVlp0WldaRFEzY3laMVV6TlhOU1puVjRRVkZTV0ZJeFdTNGlMQ0p6YVhwbGN5STZJAK9JalV4TW5nMU1USWlMQ0owZVhCbElqb2lhVzFoWjJVdmMzWm5JaXdpWkdWdWMybDBlU0k2SWpJd01UWWlmVjBsIiwidHlwZSI6InRleHQvaHRtbCIsInNpemVzIjoiMTkyeDE5MiA1MTJ4NTEyIiwiZGVuc2l0eSI6IjEyNSJ9XX0=">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2d3a8c">
     <style>
         * {
             margin: 0;
@@ -142,6 +142,20 @@
             opacity: 0.8;
         }
 
+        .install-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: none;
+        }
+
         @media (max-width: 480px) {
             .timer-display {
                 font-size: 4rem;
@@ -156,11 +170,20 @@
                 width: 100%;
                 max-width: 200px;
             }
+
+            .install-button {
+                top: 10px;
+                right: 10px;
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
         }
     </style>
 </head>
 
 <body>
+    <button class="install-button" id="installButton" onclick="installApp()">Install App</button>
+
     <div class="timer-container">
         <div class="status-text" id="statusText">Ready to start</div>
         <div class="timer-display" id="timerDisplay">0:00</div>
@@ -197,48 +220,40 @@
             }
 
             getConfiguredDuration() {
-                // Check if duration was passed as URL parameter
                 const urlParams = new URLSearchParams(window.location.search);
                 const urlDuration = urlParams.get('duration');
 
                 if (urlDuration && !isNaN(urlDuration) && urlDuration > 0) {
                     const duration = parseInt(urlDuration);
-                    // Store the duration so it persists after installation
                     this.storeDuration(duration);
                     return duration;
                 }
 
-                // Check if we have a stored duration
                 const storedDuration = this.getStoredDuration();
                 if (storedDuration) {
                     return storedDuration;
                 }
 
-                // Default to 3:30
-                return 3 * 60 + 30;
+                return 3 * 60 + 30; // Default 3:30
             }
 
             storeDuration(duration) {
                 try {
-                    const data = { duration: duration, timestamp: Date.now() };
-                    window.timerConfig = data;
-                    // Also try to store in localStorage if available (for browsers that support it)
+                    window.timerConfig = { duration: duration, timestamp: Date.now() };
                     if (typeof Storage !== 'undefined') {
-                        localStorage.setItem('timerDuration', JSON.stringify(data));
+                        localStorage.setItem('timerDuration', JSON.stringify(window.timerConfig));
                     }
                 } catch (e) {
-                    // Silently fail if storage is not available
+                    // Silent fail
                 }
             }
 
             getStoredDuration() {
                 try {
-                    // First check in-memory storage
                     if (window.timerConfig && window.timerConfig.duration) {
                         return window.timerConfig.duration;
                     }
 
-                    // Then check localStorage if available
                     if (typeof Storage !== 'undefined') {
                         const stored = localStorage.getItem('timerDuration');
                         if (stored) {
@@ -247,7 +262,7 @@
                         }
                     }
                 } catch (e) {
-                    // Silently fail if storage is not available
+                    // Silent fail
                 }
                 return null;
             }
@@ -263,7 +278,6 @@
                 this.stopBtn.addEventListener('click', () => this.stop());
                 this.resetBtn.addEventListener('click', () => this.reset());
 
-                // Handle page visibility changes
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden && this.isRunning) {
                         this.statusText.textContent = 'Timer running in background';
@@ -275,11 +289,11 @@
 
             async requestWakeLock() {
                 try {
-                    if ('wakeLock' in navigator && window.location.protocol === 'https:') {
+                    if ('wakeLock' in navigator) {
                         this.wakeLock = await navigator.wakeLock.request('screen');
                     }
                 } catch (err) {
-                    console.log('Wake lock not supported or failed:', err);
+                    // Silent fail
                 }
             }
 
@@ -374,7 +388,7 @@
                         oscillator2.stop(audioContext.currentTime + 0.5);
                     }, 600);
                 } catch (err) {
-                    console.log('Audio not supported:', err);
+                    // Silent fail
                 }
             }
 
@@ -384,50 +398,19 @@
                         navigator.vibrate([200, 100, 200, 100, 200]);
                     }
                 } catch (err) {
-                    console.log('Vibration not supported:', err);
+                    // Silent fail
                 }
             }
         }
 
-        // Service Worker registration - only works on HTTPS
-        if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-            // Create a proper service worker when hosted on HTTPS
-            const swCode = `
-                const CACHE_NAME = 'timer-pwa-v1';
-                const urlsToCache = [
-                    '/',
-                    '/index.html'
-                ];
-
-                self.addEventListener('install', event => {
-                    event.waitUntil(
-                        caches.open(CACHE_NAME)
-                            .then(cache => cache.addAll(urlsToCache))
-                    );
-                });
-
-                self.addEventListener('fetch', event => {
-                    event.respondWith(
-                        caches.match(event.request)
-                            .then(response => {
-                                if (response) {
-                                    return response;
-                                }
-                                return fetch(event.request);
-                            })
-                    );
-                });
-            `;
-
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-
-            navigator.serviceWorker.register(swUrl)
+        // Service Worker registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
-                    console.log('Service Worker registered successfully');
+                    console.log('SW registered successfully');
                 })
                 .catch(error => {
-                    console.log('Service Worker registration failed:', error);
+                    console.log('SW registration failed');
                 });
         }
 
@@ -436,27 +419,12 @@
 
         // Install prompt handling
         let deferredPrompt;
+        const installButton = document.getElementById('installButton');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-
-            // Show install hint
-            const installHint = document.createElement('div');
-            installHint.innerHTML = `
-                <div style="position: fixed; top: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 8px; z-index: 1000; text-align: center;">
-                    <p>Install this timer as an app on your device!</p>
-                    <button onclick="installApp()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer;">Install</button>
-                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 0.5rem; margin-left: 0.5rem; padding: 0.5rem 1rem; background: #fc8181; color: white; border: none; border-radius: 4px; cursor: pointer;">Later</button>
-                </div>
-            `;
-            document.body.appendChild(installHint);
-
-            setTimeout(() => {
-                if (installHint.parentElement) {
-                    installHint.remove();
-                }
-            }, 10000);
+            installButton.style.display = 'block';
         });
 
         function installApp() {
@@ -465,14 +433,19 @@
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         console.log('User accepted the install prompt');
+                        installButton.style.display = 'none';
                     }
                     deferredPrompt = null;
                 });
             }
         }
 
-        // Make installApp available globally
         window.installApp = installApp;
+
+        // Hide install button if already installed
+        window.addEventListener('appinstalled', () => {
+            installButton.style.display = 'none';
+        });
     </script>
 </body>
 
