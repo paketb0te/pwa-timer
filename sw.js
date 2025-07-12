@@ -2,6 +2,7 @@ const CACHE_NAME = 'timer-pwa-v1';
 const urlsToCache = [
     './',
     './index.html',
+    './favicon.svg',
     './manifest.json'
 ];
 
