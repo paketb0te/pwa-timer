@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3:30 Timer</title>
+    <link rel="manifest"
+        href="data:application/json;base64,eyJuYW1lIjoiMzozMCBUaW1lciIsInNob3J0X25hbWUiOiJUaW1lciIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwic3RhcnRfdXJsIjoiLyIsInRoZW1lX2NvbG9yIjoiIzJkM2E4YyIsImJhY2tncm91bmRfY29sb3IiOiIjMWEyMDJjIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1UazJJaUJvWldsbmFIUTlJakU1TmlJZ2RtbGxkMEp2ZUQwaU1DQXdJREU1TmlBeE9UWWlJR1pwYkd3OUlpTXlkRE5oT0dNaUlIaHRiRzV6UFNKb2RIUndPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1EQXdMMk41WnlJK1BHTnBjbU5zWlNCallsZ3JZMmtnUXowOU9UZ2lJSEk5SWpjMklpQm1hV3hzUFNKM2FHbDBaU0l2UGp4MFpYaDBJSGc5SWpFeElpQjVQU0k0TnlJZ1ptbHNiRDBpSTJabWJtWm1jaUlnWm05dWRDMW1ZVzFwYkhsOUltMXZibU53WVdObElpQm1iMjUwTFhOcGVtVTlJakV3SWlCbWIyNTBMWGRsYVdkb2REMGlOREF3SWlCMFpYaDBMV0ZqYUc5eVBTSnRhV1JrYkdVaVBqTTZNekE4TDNSbGVIUStQQzl6ZG1jK0lpd2ljMmw2WlhNaU9pSXhPVFl5TnpJeE1qWWlMQ0owZVhCbElqb2lhVzFoWjJVdmMzWm5JaXdpWkdWdWMybDBlU0k2SWpFeE1qVWlmU3g3SW5OeVl5STZJbVJoZEdFNmFXMWhaMlV2YzNabklubGhiV3c3WW1GelpUWTBMa1ZITVVSaFEwRkNRVUZwSWloVFJVVXJObTQwVW1kdU5sWTJSa0Z2UWxndVdHUlVjbXROUjBSNE5UZGhhVnBCZGxCWFEyOU1kVlp0WldaRFEzY3laMVV6TlhOU1puVjRRVkZTV0ZJeFdTNGlMQ0p6YVhwbGN5STZJAK9JalV4TW5nMU1USWlMQ0owZVhCbElqb2lhVzFoWjJVdmMzWm5JaXdpWkdWdWMybDBlU0k2SWpJd01UWWlmVjBsIiwidHlwZSI6InRleHQvaHRtbCIsInNpemVzIjoiMTkyeDE5MiA1MTJ4NTEyIiwiZGVuc2l0eSI6IjEyNSJ9XX0=">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .timer-container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: #63b3ed;
+            text-shadow: 0 0 20px rgba(99, 179, 237, 0.3);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-display.running {
+            color: #68d391;
+        }
+
+        .timer-display.finished {
+            color: #fc8181;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .stop-btn {
+            background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
+            color: white;
+        }
+
+        .stop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(252, 129, 129, 0.4);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #63b3ed 0%, #3182ce 100%);
+            color: white;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 179, 237, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 480px) {
+            .timer-display {
+                font-size: 4rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            button {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="timer-container">
+        <div class="status-text" id="statusText">Ready to start</div>
+        <div class="timer-display" id="timerDisplay">3:30</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="controls">
+            <button class="start-btn" id="startBtn">Start</button>
+            <button class="stop-btn" id="stopBtn" disabled>Stop</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        class Timer {
+            constructor() {
+                this.totalTime = 3 * 60 + 30; // 3:30 in seconds
+                this.timeLeft = this.totalTime;
+                this.isRunning = false;
+                this.intervalId = null;
+                this.wakeLock = null;
+
+                this.timerDisplay = document.getElementById('timerDisplay');
+                this.statusText = document.getElementById('statusText');
+                this.progressFill = document.getElementById('progressFill');
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+
+                this.bindEvents();
+                this.requestWakeLock();
+            }
+
+            bindEvents() {
+                this.startBtn.addEventListener('click', () => this.start());
+                this.stopBtn.addEventListener('click', () => this.stop());
+                this.resetBtn.addEventListener('click', () => this.reset());
+
+                // Handle page visibility changes
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && this.isRunning) {
+                        this.statusText.textContent = 'Timer running in background';
+                    } else if (!document.hidden && this.isRunning) {
+                        this.statusText.textContent = 'Timer running';
+                    }
+                });
+            }
+
+            async requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        this.wakeLock = await navigator.wakeLock.request('screen');
+                    }
+                } catch (err) {
+                    console.log('Wake lock not supported or failed:', err);
+                }
+            }
+
+            start() {
+                if (this.isRunning) return;
+
+                this.isRunning = true;
+                this.startBtn.disabled = true;
+                this.stopBtn.disabled = false;
+                this.statusText.textContent = 'Timer running';
+                this.timerDisplay.className = 'timer-display running';
+
+                this.intervalId = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateDisplay();
+                    this.updateProgress();
+
+                    if (this.timeLeft <= 0) {
+                        this.finish();
+                    }
+                }, 1000);
+            }
+
+            stop() {
+                if (!this.isRunning) return;
+
+                this.isRunning = false;
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.statusText.textContent = 'Timer stopped';
+                this.timerDisplay.className = 'timer-display';
+
+                clearInterval(this.intervalId);
+            }
+
+            reset() {
+                this.stop();
+                this.timeLeft = this.totalTime;
+                this.statusText.textContent = 'Ready to start';
+                this.timerDisplay.className = 'timer-display';
+                this.updateDisplay();
+                this.updateProgress();
+            }
+
+            finish() {
+                this.isRunning = false;
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.statusText.textContent = 'Time\'s up!';
+                this.timerDisplay.className = 'timer-display finished';
+
+                clearInterval(this.intervalId);
+                this.playSound();
+                this.vibrate();
+            }
+
+            updateDisplay() {
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                this.timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            updateProgress() {
+                const progress = ((this.totalTime - this.timeLeft) / this.totalTime) * 100;
+                this.progressFill.style.width = `${progress}%`;
+            }
+
+            playSound() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.5);
+
+                    setTimeout(() => {
+                        const oscillator2 = audioContext.createOscillator();
+                        const gainNode2 = audioContext.createGain();
+
+                        oscillator2.connect(gainNode2);
+                        gainNode2.connect(audioContext.destination);
+
+                        oscillator2.frequency.setValueAtTime(600, audioContext.currentTime);
+                        gainNode2.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+                        oscillator2.start();
+                        oscillator2.stop(audioContext.currentTime + 0.5);
+                    }, 600);
+                } catch (err) {
+                    console.log('Audio not supported:', err);
+                }
+            }
+
+            vibrate() {
+                try {
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200, 100, 200]);
+                    }
+                } catch (err) {
+                    console.log('Vibration not supported:', err);
+                }
+            }
+        }
+
+        // Service Worker registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript;base64,Y29uc3QgQ0FDSEVfTkFNRSA9ICd0aW1lci1wd2EtdjEnOwpjb25zdCB1cmxzVG9DYWNoZSA9IFsKICAnLycsCiAgJy9pbmRleC5odG1sJwpdOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4gewogIGV2ZW50LndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFX05BTUUpCiAgICAgIC50aGVuKGNhY2hlID0+IGNhY2hlLmFkZEFsbCh1cmxzVG9DYWNoZSkpCiAgKTsKfSk7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZXZlbnQgPT4gewogIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpCiAgICAgIC50aGVuKHJlc3BvbnNlID0+IHsKICAgICAgICBpZiAocmVzcG9uc2UpIHsKICAgICAgICAgIHJldHVybiByZXNwb25zZTsKICAgICAgICB9CiAgICAgICAgcmV0dXJuIGZldGNoKGV2ZW50LnJlcXVlc3QpOwogICAgICB9KQogICk7Cn0pOw==')
+                .then(registration => {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+
+        // Initialize timer
+        const timer = new Timer();
+
+        // Install prompt handling
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Show install hint
+            const installHint = document.createElement('div');
+            installHint.innerHTML = `
+                <div style="position: fixed; top: 20px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 8px; z-index: 1000; text-align: center;">
+                    <p>Install this timer as an app on your device!</p>
+                    <button onclick="installApp()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #48bb78; color: white; border: none; border-radius: 4px; cursor: pointer;">Install</button>
+                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 0.5rem; margin-left: 0.5rem; padding: 0.5rem 1rem; background: #fc8181; color: white; border: none; border-radius: 4px; cursor: pointer;">Later</button>
+                </div>
+            `;
+            document.body.appendChild(installHint);
+
+            setTimeout(() => {
+                if (installHint.parentElement) {
+                    installHint.remove();
+                }
+            }, 10000);
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // Make installApp available globally
+        window.installApp = installApp;
+    </script>
+</body>
+
+</html>
